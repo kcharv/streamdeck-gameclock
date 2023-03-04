@@ -1,0 +1,38 @@
+{
+  "Actions": [
+    {
+      "Icon": "Images/icon",
+      "Name": "Game Clock,
+      "States": [
+        {
+          "Image": "Images/pluginAction",
+          "TitleAlignment": "middle",
+          "FontSize": "12"
+        }
+      ],
+      "SupportedInMultiActions": true,
+      "Tooltip": "Game Clock",
+      "UUID": "gameclock.pluginaction",
+      "PropertyInspectorPath": "PropertyInspector/PluginActionPI.html"
+    }
+  ],
+  "Author": "kcharv",
+  "Name": "gameclock",
+  "Description": "Maintain a game clock for display",
+  "Icon": "Images/pluginIcon",
+  "URL": "sdtv.clydethedog.com",
+  "Version": "1.0",
+  "CodePath": "gameclock",
+  "Category": "Custom",
+  "CategoryIcon": "Images/categoryIcon",
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "4.9"
+  }
+}
