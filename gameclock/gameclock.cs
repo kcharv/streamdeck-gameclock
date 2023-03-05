@@ -33,6 +33,7 @@ namespace gameclock
 
             [JsonProperty(PropertyName = "gameClockTime")]
             public string GameClockTime { get; set; }
+
         }
 
         #region Private Members
@@ -96,7 +97,7 @@ namespace gameclock
         {
             long total, minutes, seconds, timeColons;
             long gameSeconds;
-            string delimiter = ":";
+            string delimiter = ":", displayClock = String.Empty;
 
             //Streamdeck uses this; and is the best place to check long press
             CheckIfResetNeeded();
@@ -134,12 +135,13 @@ namespace gameclock
 
             minutes = gameSeconds / 60;
             seconds = gameSeconds - ( minutes * 60);
+            displayClock = $"{minutes.ToString("0")}{delimiter}{seconds.ToString("00")}";
 
-           // Logger.Instance.LogMessage(TracingLevel.INFO, "gameSeconds " + gameSeconds.ToString("00"));
-           // Logger.Instance.LogMessage(TracingLevel.INFO, "minutes " + minutes.ToString("00"));
-           // Logger.Instance.LogMessage(TracingLevel.INFO, "seconds " + seconds.ToString("00"));
-
-            await Connection.SetTitleAsync($"{minutes.ToString("0")}{delimiter}{seconds.ToString("00")}");
+            // Logger.Instance.LogMessage(TracingLevel.INFO, "gameSeconds " + gameSeconds.ToString("00"));
+            // Logger.Instance.LogMessage(TracingLevel.INFO, "minutes " + minutes.ToString("00"));
+            // Logger.Instance.LogMessage(TracingLevel.INFO, "seconds " + seconds.ToString("00"));
+            SaveInputStringToFile(displayClock);
+            await Connection.SetTitleAsync(displayClock);
         }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
@@ -196,10 +198,30 @@ namespace gameclock
             }
         }
 
+        private void SaveInputStringToFile( string outputString)
+        {
+            try
+            {
+                //Logger.Instance.LogMessage(TracingLevel.INFO, $"file: {settings.GameClockFile}");
+                if (!String.IsNullOrWhiteSpace(settings.GameClockFile))
+                {
+                    File.WriteAllText(settings.GameClockFile, outputString);
+                }
+                Connection.ShowOk();
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"Error Saving value to file: {settings.GameClockFile} : {ex}");
+                Connection.ShowAlert();
+                settings.GameClockFile = "ACCESS DENIED";
+                SaveSettings();
+            }
+        }
+
         private Task SaveSettings()
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "Save Settings executed");
-            Logger.Instance.LogMessage(TracingLevel.INFO, "File Name " + settings.GameClockFile);
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "File Name " + settings.GameClockFile);
             return Connection.SetSettingsAsync(JObject.FromObject(settings));
         }
 
