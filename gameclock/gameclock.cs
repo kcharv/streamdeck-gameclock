@@ -1,9 +1,11 @@
 ﻿using BarRaider.SdTools;
+using BarRaider.SdTools.Payloads;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceModel.Channels;
@@ -15,7 +17,8 @@ using System.Timers;
 namespace gameclock
 {
     [PluginActionId("com.clydethedog.gameclock")]
-    public class gameclock : PluginBase
+    
+    public class gameclock : KeyAndEncoderBase
     {
         private class PluginSettings
         {
@@ -38,13 +41,15 @@ namespace gameclock
 
         #region Private Members
 
-         private const int RESET_COUNTER_KEYPRESS_LENGTH = 1;
+        private const int RESET_COUNTER_KEYPRESS_LENGTH = 1;
 
         private Timer tmrGameClock;
         private PluginSettings settings;
         private bool keyPressed = false;
+        private bool dialWasRotated = false;
         private DateTime keyPressStart;
         private long gameClockSeconds;
+        private int stepSize = 1;
 
         #endregion
 
@@ -84,6 +89,43 @@ namespace gameclock
             {
                 ResumeGameClock();
             }
+        }
+
+        public override void DialPress(DialPressPayload payload)
+        {
+            //long press parameters
+            keyPressStart = DateTime.Now;
+            keyPressed = true;
+
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
+
+            if (tmrGameClock != null && tmrGameClock.Enabled)
+            {
+                PauseGameClock();
+            }
+            else
+            {
+                ResumeGameClock();
+            }
+        }
+
+        public override void DialRotate(DialRotatePayload payload)
+        {
+
+            dialWasRotated = true;
+
+            int increment = payload.Ticks * stepSize * -1;                  //adding time to seconds elapsed removes seconds from gameclock; expected add should increase gameclock
+
+            PauseGameClock();
+            AdjustGameClock(increment);
+            ResumeGameClock();
+        }
+
+        public override void TouchPress(TouchpadPressPayload payload)
+        {
+            dialWasRotated = false;
+
+            return;
         }
 
         public override void KeyReleased(KeyPayload payload) 
@@ -182,6 +224,11 @@ namespace gameclock
         private void PauseGameClock()
         {
             tmrGameClock.Stop();
+        }
+
+        private void AdjustGameClock(int increment)
+        {
+            gameClockSeconds += increment;
         }
 
         private void CheckIfResetNeeded()
