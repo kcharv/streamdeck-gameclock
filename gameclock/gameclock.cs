@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 
 namespace gameclock
 {
-    [PluginActionId("gameclock.pluginaction")]
-    public class PluginAction : PluginBase
+    [PluginActionId("com.clydethedog.gameclock")]
+    public class gameclock : PluginBase
     {
         private class PluginSettings
         {
@@ -36,7 +36,7 @@ namespace gameclock
         private PluginSettings settings;
 
         #endregion
-        public PluginAction(SDConnection connection, InitialPayload payload) : base(connection, payload)
+        public gameclock(SDConnection connection, InitialPayload payload) : base(connection, payload)
         {
             if (payload.Settings == null || payload.Settings.Count == 0)
             {

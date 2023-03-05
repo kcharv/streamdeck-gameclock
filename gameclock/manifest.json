@@ -2,7 +2,7 @@
   "Actions": [
     {
       "Icon": "Images/icon",
-      "Name": "Game Clock,
+      "Name": "Game Clock",
       "States": [
         {
           "Image": "Images/pluginAction",
@@ -12,7 +12,7 @@
       ],
       "SupportedInMultiActions": true,
       "Tooltip": "Game Clock",
-      "UUID": "gameclock.pluginaction",
+      "UUID": "com.clydethedog.gameclock",
       "PropertyInspectorPath": "PropertyInspector/PluginActionPI.html"
     }
   ],
@@ -20,10 +20,10 @@
   "Name": "gameclock",
   "Description": "Maintain a game clock for display",
   "Icon": "Images/pluginIcon",
-  "URL": "sdtv.clydethedog.com",
+  "URL": "http://sdtv.clydethedog.com",
   "Version": "1.0",
   "CodePath": "gameclock",
-  "Category": "Custom",
+  "Category": "SDTV",
   "CategoryIcon": "Images/categoryIcon",
   "OS": [
     {
