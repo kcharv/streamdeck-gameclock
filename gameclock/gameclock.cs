@@ -3,10 +3,14 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.ServiceModel.Channels;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace gameclock
 {
@@ -33,9 +37,16 @@ namespace gameclock
 
         #region Private Members
 
+         private const int RESET_COUNTER_KEYPRESS_LENGTH = 1;
+
+        private Timer tmrGameClock;
         private PluginSettings settings;
+        private bool keyPressed = false;
+        private DateTime keyPressStart;
+        private long gameClockSeconds;
 
         #endregion
+
         public gameclock(SDConnection connection, InitialPayload payload) : base(connection, payload)
         {
             if (payload.Settings == null || payload.Settings.Count == 0)
@@ -47,6 +58,8 @@ namespace gameclock
             {
                 this.settings = payload.Settings.ToObject<PluginSettings>();
             }
+            Logger.Instance.LogMessage(TracingLevel.INFO, "initial run");
+            ResetCounter();                                                 //Just started, set to 0
         }
 
         public override void Dispose()
@@ -56,25 +69,137 @@ namespace gameclock
 
         public override void KeyPressed(KeyPayload payload)
         {
+            //long press parameters
+            keyPressStart = DateTime.Now;
+            keyPressed = true;
+
             Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
+
+            if  (tmrGameClock != null && tmrGameClock.Enabled)
+            {
+                PauseGameClock();
+            }
+            else
+            {
+                ResumeGameClock();
+            }
         }
 
-        public override void KeyReleased(KeyPayload payload) { }
+        public override void KeyReleased(KeyPayload payload) 
+        {
+            //track for long press parameters
+            keyPressed = false;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Key Released");
+        }
 
-        public override void OnTick() { }
+        public async override void OnTick()
+        {
+            long total, minutes, seconds, timeColons;
+            long gameSeconds;
+            string delimiter = ":";
+
+            //Streamdeck uses this; and is the best place to check long press
+            CheckIfResetNeeded();
+
+            //Set Game seconds
+            timeColons = Regex.Matches(settings.GameClockTime, ":").Count;
+
+            if (timeColons is 1)
+            {
+                try
+                {
+                    string[] timeInput = settings.GameClockTime.Split(':');
+                    gameSeconds = Convert.ToInt64(timeInput[0]) * 60 + Convert.ToInt64(timeInput[1]);
+                }
+                catch
+                {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, "gameSeconds failed split");
+                    gameSeconds = 0;
+                }
+            }
+            else
+            {
+                Logger.Instance.LogMessage(TracingLevel.INFO, "gameSeconds is not MM:SS");
+                gameSeconds = 0;
+            }
+
+
+            total = gameClockSeconds;
+            gameSeconds = gameSeconds - total;
+
+            if (gameSeconds < 0)
+            {
+                gameSeconds = 0;
+            }
+
+            minutes = gameSeconds / 60;
+            seconds = gameSeconds - ( minutes * 60);
+
+           // Logger.Instance.LogMessage(TracingLevel.INFO, "gameSeconds " + gameSeconds.ToString("00"));
+           // Logger.Instance.LogMessage(TracingLevel.INFO, "minutes " + minutes.ToString("00"));
+           // Logger.Instance.LogMessage(TracingLevel.INFO, "seconds " + seconds.ToString("00"));
+
+            await Connection.SetTitleAsync($"{minutes.ToString("0")}{delimiter}{seconds.ToString("00")}");
+        }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Received Settings");
             Tools.AutoPopulateSettings(settings, payload.Settings);
             SaveSettings();
         }
 
-        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) { }
+        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) 
+        { 
+        }
 
+        
         #region Private Methods
+
+        private void ResetCounter()
+        {
+            gameClockSeconds = 0;                                   //no time elapsed
+        }
+
+        private void ResumeGameClock()
+        {
+            if (tmrGameClock is null)                                //is there a game clock?
+            {
+                tmrGameClock = new Timer();
+                tmrGameClock.Elapsed += TmrGameClock_Elapsed;       //resume from memory
+            }
+            tmrGameClock.Interval = 1000;                           //every second
+            tmrGameClock.Start();                                   //start gameclock
+        }
+       
+        private void TmrGameClock_Elapsed( object sender, ElapsedEventArgs e)
+        {
+            gameClockSeconds++;
+        }
+
+        private void PauseGameClock()
+        {
+            tmrGameClock.Stop();
+        }
+
+        private void CheckIfResetNeeded()
+        {
+            if (!keyPressed)
+            {
+                return;
+            }
+
+            if ((DateTime.Now - keyPressStart).TotalSeconds > RESET_COUNTER_KEYPRESS_LENGTH)    //greater than reset length
+            {
+                PauseGameClock();
+                ResetCounter();
+            }
+        }
 
         private Task SaveSettings()
         {
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Save Settings executed");
+            Logger.Instance.LogMessage(TracingLevel.INFO, "File Name " + settings.GameClockFile);
             return Connection.SetSettingsAsync(JObject.FromObject(settings));
         }
 

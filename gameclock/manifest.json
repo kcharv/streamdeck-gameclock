@@ -5,6 +5,11 @@
       "Name": "Game Clock",
       "States": [
         {
+          "Image": "Images/pluginAction2",
+          "TitleAlignment": "middle",
+          "FontSize": "12"
+        },
+        {
           "Image": "Images/pluginAction",
           "TitleAlignment": "middle",
           "FontSize": "12"
@@ -23,7 +28,7 @@
   "URL": "http://sdtv.clydethedog.com",
   "Version": "1.0",
   "CodePath": "gameclock",
-  "Category": "SDTV",
+  "Category": "SuperDad TV",
   "CategoryIcon": "Images/categoryIcon",
   "OS": [
     {
