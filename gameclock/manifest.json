@@ -20,11 +20,13 @@
       "UUID": "com.clydethedog.gameclock",
       "PropertyInspectorPath": "PropertyInspector/gameclock.html",
       "Controllers": [ "Keypad", "Encoder" ],
+      "UserTitleEnabled" :  false,
       "Encoder": {
         "layout": "$B1",
         "TriggerDescription": {
           "Rotate": "Adjust the Game Clock by Seconds",
-          "Push": "Start or Stop the Game Clock"
+          "Push": "Start or Stop the Game Clock",
+          "LongTouch" :  "Reset the Game Clock"
         }
       }
     }
@@ -46,6 +48,6 @@
   ],
   "SDKVersion": 2,
   "Software": {
-    "MinimumVersion": "4.9"
+    "MinimumVersion": "6.0"
   }
 }

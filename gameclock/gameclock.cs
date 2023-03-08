@@ -144,6 +144,7 @@ namespace gameclock
         {
             if (payload.IsLongPress)
             {
+                Logger.Instance.LogMessage(TracingLevel.INFO, "Touch Long Press Detected");
                 PauseGameClock();
                 ResetCounter();
             }
