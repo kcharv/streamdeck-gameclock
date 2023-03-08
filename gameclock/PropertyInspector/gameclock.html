@@ -8,18 +8,23 @@
     <title>gameclock Settings</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/sdpi.css">
     <script src="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/sdtools.common.js"></script>
-    <script src="PluginActionPI.js"></script>
+    <script src="gameclock.js"></script>
 </head>
 <body>
     <div class="sdpi-wrapper">
-        <div class="sdpi-item" id="dvOutputFileName">
+        <div class="sdpi-item" id="dvKeyImage">
             <div class="sdpi-item-label">File Name</div>
-            <input class="sdpi-item-value sdProperty" placeholder="c:\mycounter.txt" type="file" accept=".txt" value="" id="gameClockFile">
+            <div class="sdpi-item-group file" id="filepickergroup">
+                <input class="sdpi-item-value sdProperty sdFile" type="file" id="gameClockFile" accept=".txt" onchange="setSettings()">
+                <label class="sdpi-file-info" for="gameClockFile" id="gameClockFileFilename">No file...</label>
+                <label class="sdpi-file-label" for="gameClockFile">Choose file...</label>
+            </div>
         </div>
         <div class="sdpi-item" id="dvTitlePrefix">
             <div class="sdpi-item-label">Game Clock</div>
             <input required pattern="[0-9]{2}:[0-9]{2}" class="sdpi-item-value sdProperty" placeholder="MM:SS" value="" id="gameClockTime" oninput="setSettings()">
         </div>
+
     </div>
 </body>
 </html>

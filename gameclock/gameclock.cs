@@ -49,7 +49,8 @@ namespace gameclock
         private bool dialWasRotated = false;
         private DateTime keyPressStart;
         private long gameClockSeconds;
-        private int stepSize = 1;
+        private readonly int stepSize = 1;
+        private bool isGameClockRunning;
 
         #endregion
 
@@ -93,12 +94,20 @@ namespace gameclock
 
         public override void DialPress(DialPressPayload payload)
         {
-            //long press parameters
-            keyPressStart = DateTime.Now;
-            keyPressed = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Push Action");
 
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
+            if (payload.IsDialPressed)
+            {
+                Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Pressed");
+                dialWasRotated = false;
+                return;
+            }
 
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Released");
+            if (dialWasRotated)
+            {
+                return;
+            }
             if (tmrGameClock != null && tmrGameClock.Enabled)
             {
                 PauseGameClock();
@@ -111,19 +120,33 @@ namespace gameclock
 
         public override void DialRotate(DialRotatePayload payload)
         {
-
             dialWasRotated = true;
+            isGameClockRunning = tmrGameClock.Enabled;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Rotated");
 
             int increment = payload.Ticks * stepSize * -1;                  //adding time to seconds elapsed removes seconds from gameclock; expected add should increase gameclock
 
+            if (payload.IsDialPressed)
+            {
+                increment *= 15;                                            //if pressed while turning, factor of 15 seconds
+            }
+
             PauseGameClock();
             AdjustGameClock(increment);
-            ResumeGameClock();
+            
+            if (isGameClockRunning)
+            {
+                ResumeGameClock();
+            }
         }
 
         public override void TouchPress(TouchpadPressPayload payload)
         {
-            dialWasRotated = false;
+            if (payload.IsLongPress)
+            {
+                PauseGameClock();
+                ResetCounter();
+            }
 
             return;
         }
@@ -140,6 +163,7 @@ namespace gameclock
             long total, minutes, seconds, timeColons;
             long gameSeconds;
             string delimiter = ":", displayClock = String.Empty;
+            Dictionary<string, string> displayUpdate = new Dictionary<string, string>();
 
             //Streamdeck uses this; and is the best place to check long press
             CheckIfResetNeeded();
@@ -166,7 +190,7 @@ namespace gameclock
                 gameSeconds = 0;
             }
 
-
+            
             total = gameClockSeconds;
             gameSeconds = gameSeconds - total;
 
@@ -179,11 +203,17 @@ namespace gameclock
             seconds = gameSeconds - ( minutes * 60);
             displayClock = $"{minutes.ToString("0")}{delimiter}{seconds.ToString("00")}";
 
+            displayUpdate["title"] = "Game Clock";
+            displayUpdate["value"] = $"{displayClock}";
+            displayUpdate["indicator"] = Tools.RangeToPercentage((int)gameSeconds, (int)total, 0).ToString();
+
+
             // Logger.Instance.LogMessage(TracingLevel.INFO, "gameSeconds " + gameSeconds.ToString("00"));
             // Logger.Instance.LogMessage(TracingLevel.INFO, "minutes " + minutes.ToString("00"));
             // Logger.Instance.LogMessage(TracingLevel.INFO, "seconds " + seconds.ToString("00"));
             SaveInputStringToFile(displayClock);
             await Connection.SetTitleAsync(displayClock);
+            await Connection.SetFeedbackAsync(displayUpdate);
         }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)

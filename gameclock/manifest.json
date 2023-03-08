@@ -18,16 +18,17 @@
       "SupportedInMultiActions": true,
       "Tooltip": "Game Clock",
       "UUID": "com.clydethedog.gameclock",
-      "PropertyInspectorPath": "PropertyInspector/PluginActionPI.html"
+      "PropertyInspectorPath": "PropertyInspector/gameclock.html",
+      "Controllers": [ "Keypad", "Encoder" ],
+      "Encoder": {
+        "layout": "$B1",
+        "TriggerDescription": {
+          "Rotate": "Adjust the Game Clock by Seconds",
+          "Push": "Start or Stop the Game Clock"
+        }
+      }
     }
   ],
-  "Encoder": {
-    "layout": "$B1",
-    "TriggerDescription": {
-      "Rotate": "Adjust the Game Clock by Seconds",
-      "Push": "Start or Stop the Game Clock"
-    }
-  },
   "Author": "kcharv",
   "Name": "gameclock",
   "Description": "Maintain a game clock and easily adjust the time remaining with the dials.",
