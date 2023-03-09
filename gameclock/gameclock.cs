@@ -121,7 +121,15 @@ namespace gameclock
         public override void DialRotate(DialRotatePayload payload)
         {
             dialWasRotated = true;
-            isGameClockRunning = tmrGameClock.Enabled;
+            if (tmrGameClock != null && tmrGameClock.Enabled)
+            {
+                isGameClockRunning = true;
+            } 
+            else
+            {
+                isGameClockRunning = false;
+            }
+
             Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Rotated");
 
             int increment = payload.Ticks * stepSize * -1;                  //adding time to seconds elapsed removes seconds from gameclock; expected add should increase gameclock
@@ -162,7 +170,7 @@ namespace gameclock
         public async override void OnTick()
         {
             long total, minutes, seconds, timeColons;
-            long gameSeconds;
+            long gameSeconds, gameSecondsLeft;
             string delimiter = ":", displayClock = String.Empty;
             Dictionary<string, string> displayUpdate = new Dictionary<string, string>();
 
@@ -191,30 +199,34 @@ namespace gameclock
                 gameSeconds = 0;
             }
 
-            
-            total = gameClockSeconds;
-            gameSeconds = gameSeconds - total;
+            total = gameClockSeconds;                                                                             //Elapsed Time
+            gameSecondsLeft = gameSeconds - total;                                                                    //original time - elapsed
 
-            if (gameSeconds < 0)
+            if (gameSecondsLeft < 0)
             {
-                gameSeconds = 0;
+                gameSecondsLeft = 0;
+                if (tmrGameClock != null && tmrGameClock.Enabled)
+                {
+                    PauseGameClock();
+                }
             }
 
-            minutes = gameSeconds / 60;
-            seconds = gameSeconds - ( minutes * 60);
+            minutes = gameSecondsLeft / 60;
+            seconds = gameSecondsLeft - ( minutes * 60);
             displayClock = $"{minutes.ToString("0")}{delimiter}{seconds.ToString("00")}";
 
             displayUpdate["title"] = "Game Clock";
             displayUpdate["value"] = $"{displayClock}";
-            displayUpdate["indicator"] = Tools.RangeToPercentage((int)gameSeconds, (int)total, 0).ToString();
+            displayUpdate["indicator"] = Tools.RangeToPercentage((int)gameSecondsLeft, 0, (int)gameSeconds).ToString();
 
 
-            // Logger.Instance.LogMessage(TracingLevel.INFO, "gameSeconds " + gameSeconds.ToString("00"));
             // Logger.Instance.LogMessage(TracingLevel.INFO, "minutes " + minutes.ToString("00"));
             // Logger.Instance.LogMessage(TracingLevel.INFO, "seconds " + seconds.ToString("00"));
             SaveInputStringToFile(displayClock);
+
             await Connection.SetTitleAsync(displayClock);
             await Connection.SetFeedbackAsync(displayUpdate);
+
         }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
