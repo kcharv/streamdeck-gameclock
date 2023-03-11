@@ -20,13 +20,13 @@
       "UUID": "com.clydethedog.gameclock",
       "PropertyInspectorPath": "PropertyInspector/gameclock.html",
       "Controllers": [ "Keypad", "Encoder" ],
-      "UserTitleEnabled" :  false,
+      "UserTitleEnabled" :  true,
       "Encoder": {
         "layout": "$B1",
         "TriggerDescription": {
-          "Rotate": "Adjust the Game Clock by Seconds",
-          "Push": "Start or Stop the Game Clock",
-          "LongTouch" :  "Reset the Game Clock"
+          "Rotate": "Adjust the Clock by Seconds",
+          "Push": "Start or Stop the Clock",
+          "LongTouch" :  "Reset the Clock"
         }
       }
     }

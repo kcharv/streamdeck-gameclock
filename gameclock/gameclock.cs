@@ -213,7 +213,7 @@ namespace gameclock
 
             minutes = gameSecondsLeft / 60;
             seconds = gameSecondsLeft - ( minutes * 60);
-            displayClock = $"{minutes.ToString("0")}{delimiter}{seconds.ToString("00")}";
+            displayClock = $"{String.Format("{0,2}",minutes.ToString("0"))}{delimiter}{seconds.ToString("00")}";
 
             displayUpdate["title"] = "Game Clock";
             displayUpdate["value"] = $"{displayClock}";
