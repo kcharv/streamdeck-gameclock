@@ -17,7 +17,7 @@ using System.Timers;
 namespace gameclock
 {
     [PluginActionId("com.clydethedog.gameclock")]
-    
+
     public class gameclock : KeyAndEncoderBase
     {
         private class PluginSettings
@@ -80,9 +80,9 @@ namespace gameclock
             keyPressStart = DateTime.Now;
             keyPressed = true;
 
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
 
-            if  (tmrGameClock != null && tmrGameClock.Enabled)
+            if (tmrGameClock != null && tmrGameClock.Enabled)
             {
                 PauseGameClock();
             }
@@ -94,16 +94,16 @@ namespace gameclock
 
         public override void DialPress(DialPressPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Push Action");
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Push Action");
 
             if (payload.IsDialPressed)
             {
-                Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Pressed");
+                //Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Pressed");
                 dialWasRotated = false;
                 return;
             }
 
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Released");
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Released");
             if (dialWasRotated)
             {
                 return;
@@ -124,13 +124,13 @@ namespace gameclock
             if (tmrGameClock != null && tmrGameClock.Enabled)
             {
                 isGameClockRunning = true;
-            } 
+            }
             else
             {
                 isGameClockRunning = false;
             }
 
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Rotated");
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "Dial Rotated");
 
             int increment = payload.Ticks * stepSize * -1;                  //adding time to seconds elapsed removes seconds from gameclock; expected add should increase gameclock
 
@@ -141,7 +141,7 @@ namespace gameclock
 
             PauseGameClock();
             AdjustGameClock(increment);
-            
+
             if (isGameClockRunning)
             {
                 ResumeGameClock();
@@ -152,7 +152,7 @@ namespace gameclock
         {
             if (payload.IsLongPress)
             {
-                Logger.Instance.LogMessage(TracingLevel.INFO, "Touch Long Press Detected");
+                //Logger.Instance.LogMessage(TracingLevel.INFO, "Touch Long Press Detected");
                 PauseGameClock();
                 ResetCounter();
             }
@@ -160,11 +160,11 @@ namespace gameclock
             return;
         }
 
-        public override void KeyReleased(KeyPayload payload) 
+        public override void KeyReleased(KeyPayload payload)
         {
             //track for long press parameters
             keyPressed = false;
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Key Released");
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "Key Released");
         }
 
         public async override void OnTick()
@@ -212,8 +212,8 @@ namespace gameclock
             }
 
             minutes = gameSecondsLeft / 60;
-            seconds = gameSecondsLeft - ( minutes * 60);
-            displayClock = $"{String.Format("{0,2}",minutes.ToString("0"))}{delimiter}{seconds.ToString("00")}";
+            seconds = gameSecondsLeft - (minutes * 60);
+            displayClock = $"{String.Format("{0,2}", minutes.ToString("0"))}{delimiter}{seconds.ToString("00")}";
 
             displayUpdate["title"] = "Game Clock";
             displayUpdate["value"] = $"{displayClock}";
@@ -231,16 +231,16 @@ namespace gameclock
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Received Settings");
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "Received Settings");
             Tools.AutoPopulateSettings(settings, payload.Settings);
             SaveSettings();
         }
 
-        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) 
-        { 
+        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
+        {
         }
 
-        
+
         #region Private Methods
 
         private void ResetCounter()
@@ -258,8 +258,8 @@ namespace gameclock
             tmrGameClock.Interval = 1000;                           //every second
             tmrGameClock.Start();                                   //start gameclock
         }
-       
-        private void TmrGameClock_Elapsed( object sender, ElapsedEventArgs e)
+
+        private void TmrGameClock_Elapsed(object sender, ElapsedEventArgs e)
         {
             gameClockSeconds++;
         }
@@ -288,7 +288,7 @@ namespace gameclock
             }
         }
 
-        private void SaveInputStringToFile( string outputString)
+        private void SaveInputStringToFile(string outputString)
         {
             try
             {
@@ -310,7 +310,7 @@ namespace gameclock
 
         private Task SaveSettings()
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Save Settings executed");
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "Save Settings executed");
             //Logger.Instance.LogMessage(TracingLevel.INFO, "File Name " + settings.GameClockFile);
             return Connection.SetSettingsAsync(JObject.FromObject(settings));
         }
