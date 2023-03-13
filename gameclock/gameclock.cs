@@ -18,7 +18,7 @@ namespace gameclock
 {
     [PluginActionId("com.clydethedog.gameclock")]
 
-    public class gameclock : KeyAndEncoderBase
+    public class Gameclock : KeyAndEncoderBase
     {
         private class PluginSettings
         {
@@ -54,7 +54,7 @@ namespace gameclock
 
         #endregion
 
-        public gameclock(SDConnection connection, InitialPayload payload) : base(connection, payload)
+        public Gameclock(SDConnection connection, InitialPayload payload) : base(connection, payload)
         {
             if (payload.Settings == null || payload.Settings.Count == 0)
             {
@@ -171,7 +171,7 @@ namespace gameclock
         {
             long total, minutes, seconds, timeColons;
             long gameSeconds, gameSecondsLeft;
-            string delimiter = ":", displayClock = String.Empty;
+            string delimiter = ":", displayClock;
             Dictionary<string, string> displayUpdate = new Dictionary<string, string>();
 
             //Streamdeck uses this; and is the best place to check long press
@@ -213,7 +213,7 @@ namespace gameclock
 
             minutes = gameSecondsLeft / 60;
             seconds = gameSecondsLeft - (minutes * 60);
-            displayClock = $"{String.Format("{0,2}", minutes.ToString("0"))}{delimiter}{seconds.ToString("00")}";
+            displayClock = $"{String.Format("{0,2}", minutes.ToString("0"))}{delimiter}{seconds:00}";
 
             displayUpdate["title"] = "Game Clock";
             displayUpdate["value"] = $"{displayClock}";
